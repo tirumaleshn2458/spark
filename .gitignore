@@ -62,6 +62,7 @@ log/
 logs/
 metals.sbt
 out/
+python/pyspark/tensorflow
 project/boot/
 project/build/target/
 project/plugins/lib_managed/
