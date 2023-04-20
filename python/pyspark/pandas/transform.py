@@ -4,7 +4,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-#replacing the null values
+#replacing the null values for the string columns
 def fill_null_str(data_frame,col_name,replace_str_with='Missing'):
     col_data=data_frame[col_name].copy()
     while True:
@@ -17,7 +17,7 @@ def fill_null_str(data_frame,col_name,replace_str_with='Missing'):
                 break
             elif ow_or_not.lower()=='n':
                 new_value=input('Enter the non-existing value to replace: ')
-                if new_value in np.unique(col_data.unique().to_numpy()):
+                if new_value in np.unique(col_data.dropna().unique().to_numpy()):
                     pass
                 else:
                     replaced_col=col_data.fillna(replace_str_with)
@@ -93,8 +93,7 @@ Name: col2, dtype: object
 
 '''
 
-
-
+#replacing the null values for the numerical columns
 def fill_null_num(data_frame,col_name,impute_type='mode'):
     if impute_type=='mode':
         if len(data_frame[col_name].value_counts())==0:
@@ -177,7 +176,7 @@ Changing the default value of impute_type to mean
 Name: col1, dtype: float64
 
 '''
-
+#replacing the null values for the columns in the dataframe
 def fill_null_data(data_frame,fill_null_sc='Missing',nc_impute_type='mode'):
     data=data_frame.copy()
     for col_name in data.columns:
@@ -264,7 +263,7 @@ Changing the values for fill_null_sc and nc_impute_type
 4   13.0  Missing value
 
 '''
-
+#encoding the string columns to numerical columns
 def strc_to_numc(data,col_name):
     col_data=data[col_name].copy()
     label_encode={None}
@@ -278,9 +277,7 @@ def strc_to_numc(data,col_name):
                 new_str=input('Enter the new value or press ENTER to assign the default value(missing): ')
                 if len(new_str)==0:
                     new_str='Missing'
-                print('Replace the values')
                 col_data=fill_null_str(data,col_name,replace_str_with=new_str)
-                #encoding
                 keys=np.unique(col_data.sort_values().to_numpy())
                 values=range(len(keys))
                 label_encode=dict(zip(keys,values))
@@ -294,8 +291,6 @@ def strc_to_numc(data,col_name):
                 print('Invalid Option')
                 pass
     else:
-        #encoding
-        print(col_name,' executed')
         keys=np.unique(col_data.sort_values().to_numpy())
         values=range(len(keys))
         label_encode=dict(zip(keys,values))
@@ -362,12 +357,12 @@ def strd_to_numd(data_frame):
             try:
                 converted_values=strc_to_numc(data,col_name)
                 data[col_name]=converted_values[0]
-                dictionary_values[col_name]=converted_values[1]#encoded values
+                dictionary_values[col_name]=converted_values[1]
             except:
                 data[col_name]=data[col_name].astype(str)
                 converted_values=strc_to_numc(data,col_name)
                 data[col_name]=converted_values[0]
-                dictionary_values[col_name]=converted_values[1]#encoded values
+                dictionary_values[col_name]=converted_values[1]
         else:
             pass
     return data,dictionary_values
@@ -396,5 +391,26 @@ A dictionary object
 Also see
 --------
 strc_to_numc : Encodes the string values in the column to numerical values.
+
+Examples
+--------
+
+>>> df=pd.DataFrame({'col1':['a','b','c','hello','hey'],'col2':[1,2,3,4,5],'col3':['hey','1','2','3','4']})
+>>> df
+    col1  col2 col3
+0      a     1  hey
+1      b     2    1
+2      c     3    2
+3  hello     4    3
+4    hey     5    4
+>>> transform.strd_to_numd(data_frame=df)
+col1  executed
+col3  executed
+(  col1  col2 col3
+0    0     1    4
+1    1     2    0
+2    2     3    1
+3    3     4    2
+4    4     5    3, {'col1': {'a': 0, 'b': 1, 'c': 2, 'hello': 3, 'hey': 4}, 'col3': {'1': 0, '2': 1, '3': 2, '4': 3, 'hey': 4}})
 
 '''
